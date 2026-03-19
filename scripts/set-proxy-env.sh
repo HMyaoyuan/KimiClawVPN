@@ -4,7 +4,7 @@
 
 PROXY_HTTP="http://127.0.0.1:7890"
 PROXY_SOCKS="socks5://127.0.0.1:7891"
-NO_PROXY_LIST="localhost,127.0.0.1,::1"
+NO_PROXY_LIST="localhost,127.0.0.1,::1,.feishu.cn,.feishucdn.com,.larksuite.com,.larksuit.com,.bytedance.com,.dingtalk.com,.alicdn.com,.aliyun.com,.aliyuncs.com,.taobao.com,.tmall.com,.tencent.com,.qq.com,.wechat.com,.baidu.com,.bdstatic.com,.bilibili.com,.zhihu.com,.163.com,.126.com,.jd.com,.douyin.com,.douban.com,.gitee.com,.csdn.net,.cnblogs.com,.jianshu.com"
 
 # === Layer 1: Current shell session ===
 export HTTP_PROXY="$PROXY_HTTP"
@@ -39,8 +39,8 @@ if ss -tlnp 2>/dev/null | grep -q ":7890" || netstat -tlnp 2>/dev/null | grep -q
   export https_proxy="http://127.0.0.1:7890"
   export ALL_PROXY="socks5://127.0.0.1:7891"
   export all_proxy="socks5://127.0.0.1:7891"
-  export NO_PROXY="localhost,127.0.0.1,::1"
-  export no_proxy="localhost,127.0.0.1,::1"
+  export NO_PROXY="localhost,127.0.0.1,::1,.feishu.cn,.feishucdn.com,.larksuite.com,.larksuit.com,.bytedance.com,.dingtalk.com,.alicdn.com,.aliyun.com,.aliyuncs.com,.taobao.com,.tmall.com,.tencent.com,.qq.com,.wechat.com,.baidu.com,.bdstatic.com,.bilibili.com,.zhihu.com,.163.com,.126.com,.jd.com,.douyin.com,.douban.com,.gitee.com,.csdn.net,.cnblogs.com,.jianshu.com"
+  export no_proxy="localhost,127.0.0.1,::1,.feishu.cn,.feishucdn.com,.larksuite.com,.larksuit.com,.bytedance.com,.dingtalk.com,.alicdn.com,.aliyun.com,.aliyuncs.com,.taobao.com,.tmall.com,.tencent.com,.qq.com,.wechat.com,.baidu.com,.bdstatic.com,.bilibili.com,.zhihu.com,.163.com,.126.com,.jd.com,.douyin.com,.douban.com,.gitee.com,.csdn.net,.cnblogs.com,.jianshu.com"
 fi
 # clawProxy-end
 RCEOF

@@ -10,11 +10,10 @@ API="http://127.0.0.1:9090"
 CHECK_INTERVAL=60
 PROXY="http://127.0.0.1:7890"
 
-# baidu.com 是国内站点，从中国任何网络都能直达
-# 全局代理模式下，它也会走代理，如果连 baidu 都不通说明代理彻底坏了
-DIRECT_TEST_URL="https://www.baidu.com"
-# gstatic 用于测试代理节点是否能访问海外
+# gstatic 用于测试代理节点是否能访问海外（rule 模式下会走 PROXY）
 PROXY_TEST_URL="https://www.gstatic.com/generate_204"
+# baidu.com 用于测试底层网络直连是否正常
+DIRECT_TEST_URL="https://www.baidu.com"
 
 log_info()  { echo "[$(date '+%H:%M:%S')] [WATCHDOG] $*"; }
 log_ok()    { echo "[$(date '+%H:%M:%S')] [WATCHDOG-OK] $*"; }
@@ -25,9 +24,9 @@ write_status() {
     echo "$1" > "$STATUS_FILE"
 }
 
-# 通过代理测试：如果连 baidu 都不通，说明代理完全不可用
-check_connectivity() {
-    if curl -sx "$PROXY" --connect-timeout 5 --max-time 10 "$DIRECT_TEST_URL" -o /dev/null 2>/dev/null; then
+# 通过代理测试海外站点：rule 模式下 gstatic 会走代理节点，测试代理是否可用
+check_proxy_health() {
+    if curl -sx "$PROXY" --connect-timeout 5 --max-time 10 "$PROXY_TEST_URL" -o /dev/null 2>/dev/null; then
         return 0
     fi
     return 1
@@ -41,13 +40,6 @@ check_direct() {
     return 1
 }
 
-# 测试代理节点能否访问海外站点
-check_proxy_overseas() {
-    if curl -sx "$PROXY" --connect-timeout 5 --max-time 10 "$PROXY_TEST_URL" -o /dev/null 2>/dev/null; then
-        return 0
-    fi
-    return 1
-}
 
 try_switch_node() {
     local DATA
@@ -72,7 +64,7 @@ try_switch_node() {
 
         sleep 3
 
-        if check_connectivity; then
+        if check_proxy_health; then
             log_ok "Switched to working node: $NODE"
             return 0
         fi
@@ -114,11 +106,11 @@ recover_proxy() {
 
     curl -s --noproxy '*' -X PATCH "$API/configs" \
         -H "Content-Type: application/json" \
-        -d '{"mode": "global"}' 2>/dev/null || true
+        -d '{"mode": "rule"}' 2>/dev/null || true
 
     sleep 3
 
-    if check_connectivity; then
+    if check_proxy_health; then
         write_status "healthy"
         log_ok "Proxy recovered successfully"
         return 0
@@ -138,8 +130,9 @@ recover_proxy() {
 run_daemon() {
     write_status "healthy"
     log_ok "Watchdog daemon started (check every ${CHECK_INTERVAL}s)"
-    log_info "Connectivity test: $DIRECT_TEST_URL (via proxy)"
-    log_info "If unreachable -> switch node -> if all fail -> fallback to direct"
+    log_info "Proxy health test: $PROXY_TEST_URL (overseas, via proxy)"
+    log_info "Direct network test: $DIRECT_TEST_URL"
+    log_info "If proxy unreachable -> switch node -> if all fail -> fallback to direct"
 
     while true; do
         sleep "$CHECK_INTERVAL"
@@ -149,19 +142,18 @@ run_daemon() {
         # --- FALLBACK 模式：定期尝试恢复 ---
         if [[ "$CURRENT_STATUS" == "fallback" ]]; then
             log_info "In fallback mode, testing if proxy can recover..."
-            # 先切回 global 测试
             curl -s --noproxy '*' -X PATCH "$API/configs" \
                 -H "Content-Type: application/json" \
-                -d '{"mode": "global"}' 2>/dev/null || true
+                -d '{"mode": "rule"}' 2>/dev/null || true
             sleep 2
 
-            if check_connectivity; then
+            if check_proxy_health; then
                 write_status "healthy"
                 log_ok "Proxy is working again! Recovered from fallback."
             else
                 # 当前节点不行，刷新订阅试试
                 refresh_subscription 2>/dev/null || true
-                if check_connectivity; then
+                if check_proxy_health; then
                     write_status "healthy"
                     log_ok "Proxy recovered after subscription refresh!"
                 else
@@ -175,12 +167,12 @@ run_daemon() {
         fi
 
         # --- HEALTHY 模式：正常健康检查 ---
-        if check_connectivity; then
+        if check_proxy_health; then
             continue
         fi
 
-        # 连通性检查失败！baidu.com 都不通了
-        log_warn "Connectivity check FAILED (cannot reach $DIRECT_TEST_URL via proxy)"
+        # 代理健康检查失败！海外站点不通
+        log_warn "Proxy health check FAILED (cannot reach $PROXY_TEST_URL via proxy)"
 
         # 确认底层网络本身是否正常
         if ! check_direct; then
@@ -271,18 +263,17 @@ show_status() {
         echo "Watchdog: not running"
     fi
 
-    # 实时快速检测
     echo ""
     echo "Quick connectivity test:"
-    if check_connectivity; then
-        echo "  Proxy -> baidu.com: OK"
+    if check_proxy_health; then
+        echo "  Proxy -> gstatic.com (overseas): OK"
     else
-        echo "  Proxy -> baidu.com: FAIL"
+        echo "  Proxy -> gstatic.com (overseas): FAIL"
     fi
     if check_direct; then
-        echo "  Direct -> baidu.com: OK"
+        echo "  Direct -> baidu.com (domestic): OK"
     else
-        echo "  Direct -> baidu.com: FAIL"
+        echo "  Direct -> baidu.com (domestic): FAIL"
     fi
 }
 
