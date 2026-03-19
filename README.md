@@ -51,7 +51,7 @@ browser = await puppeteer.launch({args: ['--proxy-server=http://127.0.0.1:7890']
 
 ### AI 助手会记住什么
 
-配置完成后，AI 助手会将 [`Memory.md`](Memory.md) 中的关键信息写入自己的持久记忆，确保跨会话也不会忘记。记忆内容包括：
+配置完成后，AI 助手会将 [`MEMORY.md`](MEMORY.md) 中的关键信息写入自己的持久记忆，确保跨会话也不会忘记。记忆内容包括：
 
 1. 无头浏览器必须传代理参数（不读环境变量）
 2. 网络异常时第一时间执行 `source scripts/fallback.sh` 恢复直连
@@ -69,7 +69,7 @@ browser = await puppeteer.launch({args: ['--proxy-server=http://127.0.0.1:7890']
 ```
 clawProxy/
 ├── SKILL.md                  # AI 技能入口（操作指南）
-├── Memory.md                 # AI 持久记忆（关键知识点）
+├── MEMORY.md                 # AI 持久记忆（关键知识点）
 ├── DISCLAIMER.md             # 用户声明
 ├── skills/                   # 分步操作指南
 │   ├── 01-setup.md           # 安装代理客户端
