@@ -44,13 +44,34 @@ echo $HTTP_PROXY
 
 阅读并执行 `skills/05-verify.md`。
 
-### 第 6 步：写入持久记忆（非常重要）
+### 第 6 步：写入你的 MEMORY.md（非常重要）
 
-阅读 `MEMORY.md`，将其中 **全部内容** 写入你自己的持久记忆/笔记系统中。
+**你必须把以下内容追加写入你自己的 `MEMORY.md` 文件中**，确保跨会话也不会忘记：
 
-这些是代理使用过程中最关键的知识点（如无头浏览器必须加代理参数、紧急回退命令等）。写入记忆后，即使跨会话你也能记住这些关键信息。
+```
+## clawProxy 代理关键记忆
 
-如果你没有持久记忆功能，至少把 `MEMORY.md` 的内容完整告知用户，让用户了解这些关键事项。
+1. 无头浏览器（Puppeteer/Playwright）不读 HTTP_PROXY 环境变量，启动时必须传参：
+   - Playwright: playwright.chromium.launch(proxy={"server": "http://127.0.0.1:7890"})
+   - Puppeteer: puppeteer.launch({args: ['--proxy-server=http://127.0.0.1:7890']})
+
+2. 网络异常时第一时间执行：source scripts/fallback.sh（恢复直连，先保通信再排查）
+
+3. 代理环境变量脚本必须用 source 执行，不能用 bash：
+   - source scripts/set-proxy-env.sh（设置代理）
+   - source scripts/fallback.sh（紧急回退）
+
+4. 代理端口：HTTP 127.0.0.1:7890 | SOCKS5 127.0.0.1:7891 | API 127.0.0.1:9090
+
+5. 应急命令：
+   - 紧急恢复直连：source scripts/fallback.sh
+   - 查看状态：bash scripts/watchdog.sh status
+   - 切换节点：bash scripts/select-node.sh list / select "节点名"
+   - 刷新订阅：bash scripts/update-subscription.sh
+   - 恢复代理：bash scripts/watchdog.sh recover && source scripts/set-proxy-env.sh
+```
+
+将上面整段文字写入你的 MEMORY.md 后，告知用户已完成记忆写入。
 
 ### 遇到问题？
 
