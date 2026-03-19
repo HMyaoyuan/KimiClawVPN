@@ -1,0 +1,6 @@
+.env
+*.log
+*.pid
+config/config.yaml
+config/proxy-providers/
+config/logs/
