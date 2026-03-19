@@ -81,6 +81,22 @@ try_switch_node() {
     return 1
 }
 
+refresh_subscription() {
+    log_info "Refreshing subscription to get fresh nodes..."
+    local RESPONSE
+    RESPONSE=$(curl -s --noproxy '*' -w "\n%{http_code}" \
+        -X PUT "$API/providers/proxies/subscription" 2>/dev/null || echo -e "\n000")
+    local HTTP_CODE
+    HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+    if [[ "$HTTP_CODE" == "204" || "$HTTP_CODE" == "200" ]]; then
+        log_ok "Subscription refreshed"
+        sleep 5
+        return 0
+    fi
+    log_warn "Subscription refresh failed (HTTP $HTTP_CODE)"
+    return 1
+}
+
 activate_fallback() {
     log_warn "Proxy broken. Activating fallback to DIRECT mode..."
 
@@ -143,10 +159,17 @@ run_daemon() {
                 write_status "healthy"
                 log_ok "Proxy is working again! Recovered from fallback."
             else
-                # 恢复失败，切回 direct
-                curl -s --noproxy '*' -X PATCH "$API/configs" \
-                    -H "Content-Type: application/json" \
-                    -d '{"mode": "direct"}' 2>/dev/null || true
+                # 当前节点不行，刷新订阅试试
+                refresh_subscription 2>/dev/null || true
+                if check_connectivity; then
+                    write_status "healthy"
+                    log_ok "Proxy recovered after subscription refresh!"
+                else
+                    # 恢复失败，切回 direct
+                    curl -s --noproxy '*' -X PATCH "$API/configs" \
+                        -H "Content-Type: application/json" \
+                        -d '{"mode": "direct"}' 2>/dev/null || true
+                fi
             fi
             continue
         fi
@@ -171,9 +194,18 @@ run_daemon() {
         if try_switch_node; then
             write_status "healthy"
             log_ok "Switched to a working node"
-        else
-            activate_fallback
+            continue
         fi
+
+        # 所有现有节点都不行，刷新订阅拿最新节点再试
+        if refresh_subscription && try_switch_node; then
+            write_status "healthy"
+            log_ok "Switched to a working node after subscription refresh"
+            continue
+        fi
+
+        # 彻底没救了，回退直连
+        activate_fallback
     done
 }
 

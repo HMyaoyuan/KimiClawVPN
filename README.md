@@ -29,8 +29,8 @@
 
 代理环境下最大的风险是节点失效导致 AI 助手与用户失联。本项目内置了三层保护：
 
-1. **守护进程（watchdog）** — 后台每 60 秒通过代理访问 baidu.com 检测连通性，连 baidu 都不通说明代理彻底不可用，立即自动切换节点
-2. **自动回退** — 所有节点都不可用时，守护进程立即切换到直连模式，确保通信不中断；代理恢复后自动切回
+1. **守护进程（watchdog）** — 后台每 60 秒通过代理访问 baidu.com 检测连通性，连 baidu 都不通说明代理彻底不可用，自动切换节点；如果所有节点都挂了，自动刷新订阅拉取最新节点再试
+2. **自动回退** — 刷新订阅后仍然不可用时，守护进程立即切换到直连模式，确保通信不中断；之后持续尝试恢复（含刷新订阅），代理可用时自动切回
 3. **紧急回退脚本** — AI 助手可随时执行 `source scripts/fallback.sh` 一键恢复直连
 
 ## 前提条件
@@ -58,7 +58,8 @@ clawProxy/
 │   ├── unset-proxy-env.sh    # 取消代理环境变量
 │   ├── switch-mode.sh        # 切换模式（rule/global/direct）
 │   ├── select-node.sh        # 查看/切换节点
-│   ├── watchdog.sh           # 守护进程（健康检查 + 自动切换节点）
+│   ├── update-subscription.sh # 手动刷新订阅（拉取最新节点）
+│   ├── watchdog.sh           # 守护进程（健康检查 + 切换节点 + 刷新订阅）
 │   ├── fallback.sh           # 紧急回退（一键恢复直连）
 │   └── verify.sh             # 验证连接
 ├── bin/                      # 预编译的 mihomo 二进制（免下载）
@@ -92,7 +93,8 @@ bash scripts/verify.sh                        # 验证
 bash scripts/select-node.sh list              # 查看节点
 bash scripts/select-node.sh select "节点名"   # 选节点
 bash scripts/switch-mode.sh global            # 切全局模式
-bash scripts/watchdog.sh start               # 启动守护进程（自动监控+切换节点）
+bash scripts/update-subscription.sh           # 手动刷新订阅（拉取最新节点）
+bash scripts/watchdog.sh start               # 启动守护进程（自动监控+切换节点+刷新订阅）
 bash scripts/watchdog.sh status              # 查看代理状态
 source scripts/fallback.sh                   # 紧急恢复直连（防失联）
 bash scripts/watchdog.sh recover             # 从直连恢复代理

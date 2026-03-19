@@ -39,6 +39,7 @@ bash scripts/verify.sh
 - 停止代理：`bash scripts/stop.sh && source scripts/unset-proxy-env.sh`
 - 切换模式：`bash scripts/switch-mode.sh <rule|global|direct>`
 - 切换节点：`bash scripts/select-node.sh select "节点名称"`
+- 手动刷新订阅：`bash scripts/update-subscription.sh`
 - 查看代理状态：`bash scripts/watchdog.sh status`
 - 紧急恢复直连：`source scripts/fallback.sh`
 - 从直连恢复代理：`bash scripts/watchdog.sh recover && source scripts/set-proxy-env.sh`
