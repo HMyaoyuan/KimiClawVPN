@@ -33,6 +33,32 @@
 2. **自动回退** — 刷新订阅后仍然不可用时，守护进程立即切换到直连模式，确保通信不中断；之后持续尝试恢复（含刷新订阅），代理可用时自动切回
 3. **紧急回退脚本** — AI 助手可随时执行 `source scripts/fallback.sh` 一键恢复直连
 
+### 无头浏览器代理
+
+`HTTP_PROXY` 环境变量对 Puppeteer、Playwright、Selenium 等无头浏览器 **无效**。浏览器引擎有自己独立的网络栈，不读 shell 环境变量。
+
+本项目已在技能指南中明确告知 AI 助手：使用浏览器工具时必须传入 `--proxy-server=http://127.0.0.1:7890` 启动参数。例如：
+
+```python
+# Playwright
+browser = playwright.chromium.launch(proxy={"server": "http://127.0.0.1:7890"})
+```
+
+```javascript
+// Puppeteer
+browser = await puppeteer.launch({args: ['--proxy-server=http://127.0.0.1:7890']})
+```
+
+### AI 助手会记住什么
+
+配置完成后，AI 助手会将 [`Memory.md`](Memory.md) 中的关键信息写入自己的持久记忆，确保跨会话也不会忘记。记忆内容包括：
+
+1. 无头浏览器必须传代理参数（不读环境变量）
+2. 网络异常时第一时间执行 `source scripts/fallback.sh` 恢复直连
+3. 环境变量脚本必须用 `source` 而非 `bash`
+4. 代理端口速查（HTTP 7890 / SOCKS5 7891 / API 9090）
+5. 常用应急命令表
+
 ## 前提条件
 
 - 你拥有一个 **Clash 格式** 的代理订阅链接（从你的代理服务商获取）
@@ -42,7 +68,9 @@
 
 ```
 clawProxy/
-├── SKILL.md                  # AI 技能入口
+├── SKILL.md                  # AI 技能入口（操作指南）
+├── Memory.md                 # AI 持久记忆（关键知识点）
+├── DISCLAIMER.md             # 用户声明
 ├── skills/                   # 分步操作指南
 │   ├── 01-setup.md           # 安装代理客户端
 │   ├── 02-configure.md       # 获取订阅链接并配置
@@ -61,6 +89,7 @@ clawProxy/
 │   ├── update-subscription.sh # 手动刷新订阅（拉取最新节点）
 │   ├── watchdog.sh           # 守护进程（健康检查 + 切换节点 + 刷新订阅）
 │   ├── fallback.sh           # 紧急回退（一键恢复直连）
+│   ├── setup-service.sh      # systemd 托管（崩溃自动重启 + 开机自启）
 │   └── verify.sh             # 验证连接
 ├── bin/                      # 预编译的 mihomo 二进制（免下载）
 │   ├── mihomo-linux-amd64.gz
