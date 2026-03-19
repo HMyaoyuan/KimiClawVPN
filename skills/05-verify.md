@@ -1,4 +1,4 @@
-# 第 5 步：验证翻墙连接
+# 第 5 步：验证代理连接
 
 ## 目标
 
@@ -15,7 +15,7 @@ bash scripts/verify.sh
 ```
 [TEST] Testing proxy connection...
 [OK] Google connectivity: OK
-[OK] Current IP: xx.xx.xx.xx (非中国 IP)
+[OK] Current IP: xx.xx.xx.xx
 [OK] Proxy is working correctly!
 ```
 
@@ -23,7 +23,7 @@ bash scripts/verify.sh
 
 **向用户报告：**
 
-> 翻墙配置完成！当前出口 IP 为 xx.xx.xx.xx，可以正常访问 Google 和 GitHub 了。
+> 代理配置完成！当前出口 IP 为 xx.xx.xx.xx，可以正常访问 Google 和 GitHub 了。
 
 后续你的所有网络请求（curl、wget、git 等）都会自动走代理。
 

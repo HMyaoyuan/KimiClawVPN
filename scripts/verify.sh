@@ -51,6 +51,6 @@ echo ""
 if [[ "$PASSED" == true ]]; then
     log_ok "Proxy is working correctly!"
 else
-    log_fail "Some tests failed. See skills/05-troubleshoot.md for help."
+    log_fail "Some tests failed. See skills/06-troubleshoot.md for help."
     exit 1
 fi

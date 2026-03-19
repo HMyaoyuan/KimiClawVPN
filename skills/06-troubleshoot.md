@@ -36,7 +36,7 @@ ls bin/
 - 配置文件格式错误 → 重新执行 `bash scripts/configure.sh`
 - 端口被占用 → `lsof -i :7890` 查看占用进程
 
-### 问题 3：代理启动但无法翻墙
+### 问题 3：代理启动但无法访问海外站点
 
 **排查**：
 
@@ -84,9 +84,9 @@ git config --global --unset https.proxy
 
 **现象**：`select-node.sh list` 无节点。
 
-**原因**：订阅链接拉取失败（可能因为订阅服务本身也被墙了）。
+**原因**：订阅链接拉取失败（可能因为订阅服务本身的网络不可达）。
 
 **解决**：
 
 1. 检查日志：`tail -30 config/logs/mihomo.log`
-2. 如果订阅链接也需要翻墙才能访问，这是先有鸡还是先有蛋的问题。让用户手动在能翻墙的设备上下载订阅配置内容，然后直接粘贴到 `config/config.yaml` 中替换 `proxy-providers` 部分。
+2. 如果订阅链接本身也需要代理才能访问，让用户手动在能正常访问的设备上下载订阅配置内容，然后直接粘贴到 `config/config.yaml` 中替换 `proxy-providers` 部分。

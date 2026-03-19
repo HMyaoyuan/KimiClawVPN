@@ -6,7 +6,7 @@
 
 ## 操作
 
-确保当前在 KimiClawVPN 项目根目录下：
+确保当前在 clawProxy 项目根目录下：
 
 ```bash
 ls SKILL.md

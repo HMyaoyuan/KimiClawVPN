@@ -68,7 +68,7 @@ trap 'rm -f "$TMP_FILE" "/tmp/mihomo-$$"' EXIT
 if ! download_file "$GITHUB_URL" "$TMP_FILE"; then
     log_info "GitHub download failed, trying mirror..."
     if ! download_file "$MIRROR_URL" "$TMP_FILE"; then
-        log_err "All download sources failed. See skills/05-troubleshoot.md for manual installation."
+        log_err "All download sources failed. See skills/06-troubleshoot.md for manual installation."
         exit 1
     fi
 fi

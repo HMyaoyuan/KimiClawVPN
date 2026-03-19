@@ -1,8 +1,8 @@
-# KimiClawVPN 技能指南
+# clawProxy 技能指南
 
 ## 概述
 
-本技能帮助你在 Linux VM 中配置 VPN 代理，实现翻墙上网（访问 Google、GitHub 等被墙网站）。
+本技能帮助你在 Linux VM 中配置网络代理，以便访问 Google、GitHub 等学术和开发资源。
 
 ## 前置检查
 
